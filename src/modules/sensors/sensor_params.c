@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2012-2014 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2012-2017 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,13 +36,24 @@
  *
  * Parameters defined by the sensors task.
  *
- * @author Lorenz Meier <lm@inf.ethz.ch>
- * @author Julian Oes <joes@student.ethz.ch>
- * @author Thomas Gubler <thomasgubler@student.ethz.ch>
+ * @author Lorenz Meier <lorenz@px4.io>
+ * @author Julian Oes <julian@px4.io>
+ * @author Thomas Gubler <thomas@px4.io>
  */
 
-#include <nuttx/config.h>
-#include <systemlib/param/param.h>
+/**
+ * ID of the board this parameter set was calibrated on.
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_BOARD_ID, 0);
+
+/**
+ * ID of the Gyro that the calibration is for.
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_GYRO0_ID, 0);
 
 /**
  * Gyro X-axis offset
@@ -51,7 +62,7 @@
  * @max 10.0
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_GYRO_XOFF, 0.0f);
+PARAM_DEFINE_FLOAT(CAL_GYRO0_XOFF, 0.0f);
 
 /**
  * Gyro Y-axis offset
@@ -60,7 +71,7 @@ PARAM_DEFINE_FLOAT(SENS_GYRO_XOFF, 0.0f);
  * @max 10.0
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_GYRO_YOFF, 0.0f);
+PARAM_DEFINE_FLOAT(CAL_GYRO0_YOFF, 0.0f);
 
 /**
  * Gyro Z-axis offset
@@ -69,7 +80,7 @@ PARAM_DEFINE_FLOAT(SENS_GYRO_YOFF, 0.0f);
  * @max 5.0
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_GYRO_ZOFF, 0.0f);
+PARAM_DEFINE_FLOAT(CAL_GYRO0_ZOFF, 0.0f);
 
 /**
  * Gyro X-axis scaling factor
@@ -78,7 +89,7 @@ PARAM_DEFINE_FLOAT(SENS_GYRO_ZOFF, 0.0f);
  * @max 1.5
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_GYRO_XSCALE, 1.0f);
+PARAM_DEFINE_FLOAT(CAL_GYRO0_XSCALE, 1.0f);
 
 /**
  * Gyro Y-axis scaling factor
@@ -87,7 +98,7 @@ PARAM_DEFINE_FLOAT(SENS_GYRO_XSCALE, 1.0f);
  * @max 1.5
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_GYRO_YSCALE, 1.0f);
+PARAM_DEFINE_FLOAT(CAL_GYRO0_YSCALE, 1.0f);
 
 /**
  * Gyro Z-axis scaling factor
@@ -96,8 +107,56 @@ PARAM_DEFINE_FLOAT(SENS_GYRO_YSCALE, 1.0f);
  * @max 1.5
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_GYRO_ZSCALE, 1.0f);
+PARAM_DEFINE_FLOAT(CAL_GYRO0_ZSCALE, 1.0f);
 
+/**
+ * ID of Magnetometer the calibration is for.
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_MAG0_ID, 0);
+
+/**
+ * Rotation of magnetometer 0 relative to airframe.
+ *
+ * An internal magnetometer will force a value of -1, so a GCS
+ * should only attempt to configure the rotation if the value is
+ * greater than or equal to zero.
+ *
+ * @value -1 Internal mag
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ * @value 8 Roll 180°
+ * @value 9 Roll 180°, Yaw 45°
+ * @value 10 Roll 180°, Yaw 90°
+ * @value 11 Roll 180°, Yaw 135°
+ * @value 12 Pitch 180°
+ * @value 13 Roll 180°, Yaw 225°
+ * @value 14 Roll 180°, Yaw 270°
+ * @value 15 Roll 180°, Yaw 315°
+ * @value 16 Roll 90°
+ * @value 17 Roll 90°, Yaw 45°
+ * @value 18 Roll 90°, Yaw 90°
+ * @value 19 Roll 90°, Yaw 135°
+ * @value 20 Roll 270°
+ * @value 21 Roll 270°, Yaw 45°
+ * @value 22 Roll 270°, Yaw 90°
+ * @value 23 Roll 270°, Yaw 135°
+ * @value 24 Pitch 90°
+ * @value 25 Pitch 270°
+ *
+ * @min -1
+ * @max 30
+ * @reboot_required true
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_MAG0_ROT, -1);
 
 /**
  * Magnetometer X-axis offset
@@ -106,7 +165,7 @@ PARAM_DEFINE_FLOAT(SENS_GYRO_ZSCALE, 1.0f);
  * @max 500.0
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_MAG_XOFF, 0.0f);
+PARAM_DEFINE_FLOAT(CAL_MAG0_XOFF, 0.0f);
 
 /**
  * Magnetometer Y-axis offset
@@ -115,7 +174,7 @@ PARAM_DEFINE_FLOAT(SENS_MAG_XOFF, 0.0f);
  * @max 500.0
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_MAG_YOFF, 0.0f);
+PARAM_DEFINE_FLOAT(CAL_MAG0_YOFF, 0.0f);
 
 /**
  * Magnetometer Z-axis offset
@@ -124,123 +183,749 @@ PARAM_DEFINE_FLOAT(SENS_MAG_YOFF, 0.0f);
  * @max 500.0
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_MAG_ZOFF, 0.0f);
+PARAM_DEFINE_FLOAT(CAL_MAG0_ZOFF, 0.0f);
 
 /**
  * Magnetometer X-axis scaling factor
  *
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_MAG_XSCALE, 1.0f);
+PARAM_DEFINE_FLOAT(CAL_MAG0_XSCALE, 1.0f);
 
 /**
  * Magnetometer Y-axis scaling factor
  *
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_MAG_YSCALE, 1.0f);
+PARAM_DEFINE_FLOAT(CAL_MAG0_YSCALE, 1.0f);
 
 /**
  * Magnetometer Z-axis scaling factor
  *
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_MAG_ZSCALE, 1.0f);
+PARAM_DEFINE_FLOAT(CAL_MAG0_ZSCALE, 1.0f);
 
+/**
+ * ID of the Accelerometer that the calibration is for.
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_ACC0_ID, 0);
 
 /**
  * Accelerometer X-axis offset
  *
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_ACC_XOFF, 0.0f);
+PARAM_DEFINE_FLOAT(CAL_ACC0_XOFF, 0.0f);
 
 /**
  * Accelerometer Y-axis offset
  *
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_ACC_YOFF, 0.0f);
+PARAM_DEFINE_FLOAT(CAL_ACC0_YOFF, 0.0f);
 
 /**
  * Accelerometer Z-axis offset
  *
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_ACC_ZOFF, 0.0f);
+PARAM_DEFINE_FLOAT(CAL_ACC0_ZOFF, 0.0f);
 
 /**
  * Accelerometer X-axis scaling factor
  *
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_ACC_XSCALE, 1.0f);
+PARAM_DEFINE_FLOAT(CAL_ACC0_XSCALE, 1.0f);
 
 /**
  * Accelerometer Y-axis scaling factor
  *
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_ACC_YSCALE, 1.0f);
+PARAM_DEFINE_FLOAT(CAL_ACC0_YSCALE, 1.0f);
 
 /**
  * Accelerometer Z-axis scaling factor
  *
  * @group Sensor Calibration
  */
-PARAM_DEFINE_FLOAT(SENS_ACC_ZSCALE, 1.0f);
+PARAM_DEFINE_FLOAT(CAL_ACC0_ZSCALE, 1.0f);
+
+/**
+ * ID of the Gyro that the calibration is for.
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_GYRO1_ID, 0);
+
+/**
+ * Gyro X-axis offset
+ *
+ * @min -10.0
+ * @max 10.0
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_GYRO1_XOFF, 0.0f);
+
+/**
+ * Gyro Y-axis offset
+ *
+ * @min -10.0
+ * @max 10.0
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_GYRO1_YOFF, 0.0f);
+
+/**
+ * Gyro Z-axis offset
+ *
+ * @min -5.0
+ * @max 5.0
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_GYRO1_ZOFF, 0.0f);
+
+/**
+ * Gyro X-axis scaling factor
+ *
+ * @min -1.5
+ * @max 1.5
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_GYRO1_XSCALE, 1.0f);
+
+/**
+ * Gyro Y-axis scaling factor
+ *
+ * @min -1.5
+ * @max 1.5
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_GYRO1_YSCALE, 1.0f);
+
+/**
+ * Gyro Z-axis scaling factor
+ *
+ * @min -1.5
+ * @max 1.5
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_GYRO1_ZSCALE, 1.0f);
+
+/**
+ * ID of Magnetometer the calibration is for.
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_MAG1_ID, 0);
+
+/**
+ * Rotation of magnetometer 1 relative to airframe.
+ *
+ * An internal magnetometer will force a value of -1, so a GCS
+ * should only attempt to configure the rotation if the value is
+ * greater than or equal to zero.
+ *
+ * @value -1 Internal mag
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ * @value 8 Roll 180°
+ * @value 9 Roll 180°, Yaw 45°
+ * @value 10 Roll 180°, Yaw 90°
+ * @value 11 Roll 180°, Yaw 135°
+ * @value 12 Pitch 180°
+ * @value 13 Roll 180°, Yaw 225°
+ * @value 14 Roll 180°, Yaw 270°
+ * @value 15 Roll 180°, Yaw 315°
+ * @value 16 Roll 90°
+ * @value 17 Roll 90°, Yaw 45°
+ * @value 18 Roll 90°, Yaw 90°
+ * @value 19 Roll 90°, Yaw 135°
+ * @value 20 Roll 270°
+ * @value 21 Roll 270°, Yaw 45°
+ * @value 22 Roll 270°, Yaw 90°
+ * @value 23 Roll 270°, Yaw 135°
+ * @value 24 Pitch 90°
+ * @value 25 Pitch 270°
+ *
+ * @min -1
+ * @max 30
+ * @reboot_required true
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_MAG1_ROT, -1);
+
+/**
+ * Magnetometer X-axis offset
+ *
+ * @min -500.0
+ * @max 500.0
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG1_XOFF, 0.0f);
+
+/**
+ * Magnetometer Y-axis offset
+ *
+ * @min -500.0
+ * @max 500.0
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG1_YOFF, 0.0f);
+
+/**
+ * Magnetometer Z-axis offset
+ *
+ * @min -500.0
+ * @max 500.0
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG1_ZOFF, 0.0f);
+
+/**
+ * Magnetometer X-axis scaling factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG1_XSCALE, 1.0f);
+
+/**
+ * Magnetometer Y-axis scaling factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG1_YSCALE, 1.0f);
+
+/**
+ * Magnetometer Z-axis scaling factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG1_ZSCALE, 1.0f);
+
+/**
+ * ID of the Accelerometer that the calibration is for.
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_ACC1_ID, 0);
+
+/**
+ * Accelerometer X-axis offset
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_ACC1_XOFF, 0.0f);
+
+/**
+ * Accelerometer Y-axis offset
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_ACC1_YOFF, 0.0f);
+
+/**
+ * Accelerometer Z-axis offset
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_ACC1_ZOFF, 0.0f);
+
+/**
+ * Accelerometer X-axis scaling factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_ACC1_XSCALE, 1.0f);
+
+/**
+ * Accelerometer Y-axis scaling factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_ACC1_YSCALE, 1.0f);
+
+/**
+ * Accelerometer Z-axis scaling factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_ACC1_ZSCALE, 1.0f);
+
+/**
+ * ID of the Gyro that the calibration is for.
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_GYRO2_ID, 0);
+
+/**
+ * Gyro X-axis offset
+ *
+ * @min -10.0
+ * @max 10.0
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_GYRO2_XOFF, 0.0f);
+
+/**
+ * Gyro Y-axis offset
+ *
+ * @min -10.0
+ * @max 10.0
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_GYRO2_YOFF, 0.0f);
+
+/**
+ * Gyro Z-axis offset
+ *
+ * @min -5.0
+ * @max 5.0
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_GYRO2_ZOFF, 0.0f);
+
+/**
+ * Gyro X-axis scaling factor
+ *
+ * @min -1.5
+ * @max 1.5
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_GYRO2_XSCALE, 1.0f);
+
+/**
+ * Gyro Y-axis scaling factor
+ *
+ * @min -1.5
+ * @max 1.5
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_GYRO2_YSCALE, 1.0f);
+
+/**
+ * Gyro Z-axis scaling factor
+ *
+ * @min -1.5
+ * @max 1.5
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_GYRO2_ZSCALE, 1.0f);
+
+/**
+ * ID of Magnetometer the calibration is for.
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_MAG2_ID, 0);
+
+/**
+ * Rotation of magnetometer 2 relative to airframe.
+ *
+ * An internal magnetometer will force a value of -1, so a GCS
+ * should only attempt to configure the rotation if the value is
+ * greater than or equal to zero.
+ *
+ * @value -1 Internal mag
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ * @value 8 Roll 180°
+ * @value 9 Roll 180°, Yaw 45°
+ * @value 10 Roll 180°, Yaw 90°
+ * @value 11 Roll 180°, Yaw 135°
+ * @value 12 Pitch 180°
+ * @value 13 Roll 180°, Yaw 225°
+ * @value 14 Roll 180°, Yaw 270°
+ * @value 15 Roll 180°, Yaw 315°
+ * @value 16 Roll 90°
+ * @value 17 Roll 90°, Yaw 45°
+ * @value 18 Roll 90°, Yaw 90°
+ * @value 19 Roll 90°, Yaw 135°
+ * @value 20 Roll 270°
+ * @value 21 Roll 270°, Yaw 45°
+ * @value 22 Roll 270°, Yaw 90°
+ * @value 23 Roll 270°, Yaw 135°
+ * @value 24 Pitch 90°
+ * @value 25 Pitch 270°
+ *
+ * @min -1
+ * @max 30
+ * @reboot_required true
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_MAG2_ROT, -1);
+
+/**
+ * Magnetometer X-axis offset
+ *
+ * @min -500.0
+ * @max 500.0
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG2_XOFF, 0.0f);
+
+/**
+ * Magnetometer Y-axis offset
+ *
+ * @min -500.0
+ * @max 500.0
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG2_YOFF, 0.0f);
+
+/**
+ * Magnetometer Z-axis offset
+ *
+ * @min -500.0
+ * @max 500.0
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG2_ZOFF, 0.0f);
+
+/**
+ * Magnetometer X-axis scaling factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG2_XSCALE, 1.0f);
+
+/**
+ * Magnetometer Y-axis scaling factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG2_YSCALE, 1.0f);
+
+/**
+ * Magnetometer Z-axis scaling factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG2_ZSCALE, 1.0f);
+
+/**
+ * ID of the Accelerometer that the calibration is for.
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_ACC2_ID, 0);
+
+/**
+ * Accelerometer X-axis offset
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_ACC2_XOFF, 0.0f);
+
+/**
+ * Accelerometer Y-axis offset
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_ACC2_YOFF, 0.0f);
+
+/**
+ * Accelerometer Z-axis offset
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_ACC2_ZOFF, 0.0f);
+
+/**
+ * Accelerometer X-axis scaling factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_ACC2_XSCALE, 1.0f);
+
+/**
+ * Accelerometer Y-axis scaling factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_ACC2_YSCALE, 1.0f);
+
+/**
+ * Accelerometer Z-axis scaling factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_ACC2_ZSCALE, 1.0f);
+
+/**
+ * ID of Magnetometer the calibration is for.
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_MAG3_ID, 0);
+
+/**
+ * Rotation of magnetometer 2 relative to airframe.
+ *
+ * An internal magnetometer will force a value of -1, so a GCS
+ * should only attempt to configure the rotation if the value is
+ * greater than or equal to zero.
+ *
+ * @value -1 Internal mag
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ * @value 8 Roll 180°
+ * @value 9 Roll 180°, Yaw 45°
+ * @value 10 Roll 180°, Yaw 90°
+ * @value 11 Roll 180°, Yaw 135°
+ * @value 12 Pitch 180°
+ * @value 13 Roll 180°, Yaw 225°
+ * @value 14 Roll 180°, Yaw 270°
+ * @value 15 Roll 180°, Yaw 315°
+ * @value 16 Roll 90°
+ * @value 17 Roll 90°, Yaw 45°
+ * @value 18 Roll 90°, Yaw 90°
+ * @value 19 Roll 90°, Yaw 135°
+ * @value 20 Roll 270°
+ * @value 21 Roll 270°, Yaw 45°
+ * @value 22 Roll 270°, Yaw 90°
+ * @value 23 Roll 270°, Yaw 135°
+ * @value 24 Pitch 90°
+ * @value 25 Pitch 270°
+ *
+ * @min -1
+ * @max 30
+ * @reboot_required true
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_MAG3_ROT, -1);
+
+/**
+ * Magnetometer X-axis offset
+ *
+ * @min -500.0
+ * @max 500.0
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG3_XOFF, 0.0f);
+
+/**
+ * Magnetometer Y-axis offset
+ *
+ * @min -500.0
+ * @max 500.0
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG3_YOFF, 0.0f);
+
+/**
+ * Magnetometer Z-axis offset
+ *
+ * @min -500.0
+ * @max 500.0
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG3_ZOFF, 0.0f);
+
+/**
+ * Magnetometer X-axis scaling factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG3_XSCALE, 1.0f);
+
+/**
+ * Magnetometer Y-axis scaling factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG3_YSCALE, 1.0f);
+
+/**
+ * Magnetometer Z-axis scaling factor
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_MAG3_ZSCALE, 1.0f);
 
 
 /**
+ * Primary accel ID
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_ACC_PRIME, 0);
+
+/**
+ * Primary gyro ID
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_GYRO_PRIME, 0);
+
+/**
+ * Primary mag ID
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_MAG_PRIME, 0);
+
+/**
+ * Bitfield selecting mag sides for calibration
+ *
+ * DETECT_ORIENTATION_TAIL_DOWN = 1
+ * DETECT_ORIENTATION_NOSE_DOWN = 2
+ * DETECT_ORIENTATION_LEFT = 4
+ * DETECT_ORIENTATION_RIGHT = 8
+ * DETECT_ORIENTATION_UPSIDE_DOWN = 16
+ * DETECT_ORIENTATION_RIGHTSIDE_UP = 32
+ *
+ * @min 34
+ * @max 63
+ * @value 34 Two side calibration
+ * @value 38 Three side calibration
+ * @value 63 Six side calibration
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_MAG_SIDES, 63);
+
+/**
+ * Primary baro ID
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_BARO_PRIME, 0);
+
+/**
+ * Airspeed sensor pitot model
+ *
+ * @value 0 HB Pitot
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(CAL_AIR_PMODEL, 0);
+
+/**
+ * Airspeed sensor tube length
+ * @min 0.01
+ * @max 0.5
+ * @unit meter
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_FLOAT(CAL_AIR_TUBELEN, 0.2f);
+
+/**
  * Differential pressure sensor offset
+ *
+ * The offset (zero-reading) in Pascal
  *
  * @group Sensor Calibration
  */
 PARAM_DEFINE_FLOAT(SENS_DPRES_OFF, 0.0f);
 
 /**
- * Differential pressure sensor analog enabled
+ * Differential pressure sensor analog scaling
+ *
+ * Pick the appropriate scaling from the datasheet.
+ * this number defines the (linear) conversion from voltage
+ * to Pascal (pa). For the MPXV7002DP this is 1000.
+ *
+ * NOTE: If the sensor always registers zero, try switching
+ * the static and dynamic tubes.
  *
  * @group Sensor Calibration
  */
-PARAM_DEFINE_INT32(SENS_DPRES_ANA, 0);
+PARAM_DEFINE_FLOAT(SENS_DPRES_ANSC, 0);
+
+/**
+ * QNH for barometer
+ *
+ * @min 500
+ * @max 1500
+ * @group Sensor Calibration
+ * @unit hPa
+ */
+PARAM_DEFINE_FLOAT(SENS_BARO_QNH, 1013.25f);
 
 
 /**
  * Board rotation
  *
  * This parameter defines the rotation of the FMU board relative to the platform.
- * Possible values are:
- *    0 = No rotation
- *    1 = Yaw 45°
- *    2 = Yaw 90°
- *    3 = Yaw 135°
- *    4 = Yaw 180°
- *    5 = Yaw 225°
- *    6 = Yaw 270°
- *    7 = Yaw 315°
- *    8 = Roll 180°
- *    9 = Roll 180°, Yaw 45°
- *   10 = Roll 180°, Yaw 90°
- *   11 = Roll 180°, Yaw 135°
- *   12 = Pitch 180°
- *   13 = Roll 180°, Yaw 225°
- *   14 = Roll 180°, Yaw 270°
- *   15 = Roll 180°, Yaw 315°
- *   16 = Roll 90°
- *   17 = Roll 90°, Yaw 45°
- *   18 = Roll 90°, Yaw 90°
- *   19 = Roll 90°, Yaw 135°
- *   20 = Roll 270°
- *   21 = Roll 270°, Yaw 45°
- *   22 = Roll 270°, Yaw 90°
- *   23 = Roll 270°, Yaw 135°
- *   24 = Pitch 90°
- *   25 = Pitch 270°
+ *
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ * @value 8 Roll 180°
+ * @value 9 Roll 180°, Yaw 45°
+ * @value 10 Roll 180°, Yaw 90°
+ * @value 11 Roll 180°, Yaw 135°
+ * @value 12 Pitch 180°
+ * @value 13 Roll 180°, Yaw 225°
+ * @value 14 Roll 180°, Yaw 270°
+ * @value 15 Roll 180°, Yaw 315°
+ * @value 16 Roll 90°
+ * @value 17 Roll 90°, Yaw 45°
+ * @value 18 Roll 90°, Yaw 90°
+ * @value 19 Roll 90°, Yaw 135°
+ * @value 20 Roll 270°
+ * @value 21 Roll 270°, Yaw 45°
+ * @value 22 Roll 270°, Yaw 90°
+ * @value 23 Roll 270°, Yaw 135°
+ * @value 24 Pitch 90°
+ * @value 25 Pitch 270°
+ *
+ * @reboot_required true
  *
  * @group Sensor Calibration
  */
 PARAM_DEFINE_INT32(SENS_BOARD_ROT, 0);
+
+/**
+ * PX4Flow board rotation
+ *
+ * This parameter defines the yaw rotation of the PX4FLOW board relative to the vehicle body frame.
+ * Zero rotation is defined as X on flow board pointing towards front of vehicle.
+ * The recommneded installation default for the PX4FLOW board is with the Y axis forward (270 deg yaw).
+ *
+ * @value 0 No rotation
+ * @value 1 Yaw 45°
+ * @value 2 Yaw 90°
+ * @value 3 Yaw 135°
+ * @value 4 Yaw 180°
+ * @value 5 Yaw 225°
+ * @value 6 Yaw 270°
+ * @value 7 Yaw 315°
+ *
+ * @reboot_required true
+ *
+ * @group Sensor Calibration
+ */
+PARAM_DEFINE_INT32(SENS_FLOW_ROT, 6);
 
 /**
  * Board rotation Y (Pitch) offset
@@ -248,9 +933,10 @@ PARAM_DEFINE_INT32(SENS_BOARD_ROT, 0);
  * This parameter defines a rotational offset in degrees around the Y (Pitch) axis. It allows the user
  * to fine tune the board offset in the event of misalignment.
  *
+ * @unit deg
  * @group Sensor Calibration
  */
- PARAM_DEFINE_FLOAT(SENS_BOARD_Y_OFF, 0.0f);
+PARAM_DEFINE_FLOAT(SENS_BOARD_Y_OFF, 0.0f);
 
 /**
  * Board rotation X (Roll) offset
@@ -258,6 +944,7 @@ PARAM_DEFINE_INT32(SENS_BOARD_ROT, 0);
  * This parameter defines a rotational offset in degrees around the X (Roll) axis It allows the user
  * to fine tune the board offset in the event of misalignment.
  *
+ * @unit deg
  * @group Sensor Calibration
  */
 PARAM_DEFINE_FLOAT(SENS_BOARD_X_OFF, 0.0f);
@@ -268,546 +955,222 @@ PARAM_DEFINE_FLOAT(SENS_BOARD_X_OFF, 0.0f);
  * This parameter defines a rotational offset in degrees around the Z (Yaw) axis. It allows the user
  * to fine tune the board offset in the event of misalignment.
  *
+ * @unit deg
  * @group Sensor Calibration
  */
 PARAM_DEFINE_FLOAT(SENS_BOARD_Z_OFF, 0.0f);
 
 /**
- * External magnetometer rotation
+ * Select primary magnetometer.
+ * DEPRECATED, only used on V1 hardware
  *
- * This parameter defines the rotation of the external magnetometer relative
- * to the platform (not relative to the FMU).
- * See SENS_BOARD_ROT for possible values.
- *
+ * @min 0
+ * @max 2
+ * @value 0 Auto-select Mag
+ * @value 1 External is primary Mag
+ * @value 2 Internal is primary Mag
  * @group Sensor Calibration
  */
-PARAM_DEFINE_INT32(SENS_EXT_MAG_ROT, 0);
-
-
-/**
- * RC Channel 1 Minimum
- *
- * Minimum value for RC channel 1
- *
- * @min 800.0
- * @max 1500.0
- * @group Radio Calibration
- */
-PARAM_DEFINE_FLOAT(RC1_MIN, 1000.0f);
+PARAM_DEFINE_INT32(SENS_EXT_MAG, 0);
 
 /**
- * RC Channel 1 Trim
+ * Threshold (of RMS) to warn about high vibration levels
  *
- * Mid point value (same as min for throttle)
- *
- * @min 800.0
- * @max 2200.0
- * @group Radio Calibration
+ * @group Sensor Calibration
+ * @min 0.01
+ * @max 10
+ * @decimal 2
  */
-PARAM_DEFINE_FLOAT(RC1_TRIM, 1500.0f);
-
-/**
- * RC Channel 1 Maximum
- *
- * Maximum value for RC channel 1
- *
- * @min 1500.0
- * @max 2200.0
- * @group Radio Calibration
- */
-PARAM_DEFINE_FLOAT(RC1_MAX, 2000.0f);
-
-/**
- * RC Channel 1 Reverse
- *
- * Set to -1 to reverse channel.
- *
- * @min -1.0
- * @max 1.0
- * @group Radio Calibration
- */
-PARAM_DEFINE_FLOAT(RC1_REV, 1.0f);
-
-/**
- * RC Channel 1 dead zone
- *
- * The +- range of this value around the trim value will be considered as zero.
- *
- * @min 0.0
- * @max 100.0
- * @group Radio Calibration
- */
-PARAM_DEFINE_FLOAT(RC1_DZ, 10.0f);
-
-/**
- * RC Channel 2 Minimum
- *
- * Minimum value for RC channel 2
- *
- * @min 800.0
- * @max 1500.0
- * @group Radio Calibration
- */
-PARAM_DEFINE_FLOAT(RC2_MIN, 1000.0f);
-
-/**
- * RC Channel 2 Trim
- *
- * Mid point value (same as min for throttle)
- *
- * @min 800.0
- * @max 2200.0
- * @group Radio Calibration
- */
-PARAM_DEFINE_FLOAT(RC2_TRIM, 1500.0f);
-
-/**
- * RC Channel 2 Maximum
- *
- * Maximum value for RC channel 2
- *
- * @min 1500.0
- * @max 2200.0
- * @group Radio Calibration
- */
-PARAM_DEFINE_FLOAT(RC2_MAX, 2000.0f);
-
-/**
- * RC Channel 2 Reverse
- *
- * Set to -1 to reverse channel.
- *
- * @min -1.0
- * @max 1.0
- * @group Radio Calibration
- */
-PARAM_DEFINE_FLOAT(RC2_REV, 1.0f);
-
-/**
- * RC Channel 2 dead zone
- *
- * The +- range of this value around the trim value will be considered as zero.
- *
- * @min 0.0
- * @max 100.0
- * @group Radio Calibration
- */
-PARAM_DEFINE_FLOAT(RC2_DZ, 10.0f);
-
-PARAM_DEFINE_FLOAT(RC3_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC3_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC3_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC3_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC3_DZ, 10.0f);
-
-PARAM_DEFINE_FLOAT(RC4_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC4_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC4_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC4_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC4_DZ, 10.0f);
-
-PARAM_DEFINE_FLOAT(RC5_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC5_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC5_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC5_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC5_DZ,  10.0f);
-
-PARAM_DEFINE_FLOAT(RC6_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC6_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC6_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC6_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC6_DZ, 10.0f);
-
-PARAM_DEFINE_FLOAT(RC7_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC7_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC7_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC7_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC7_DZ, 10.0f);
-
-PARAM_DEFINE_FLOAT(RC8_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC8_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC8_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC8_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC8_DZ, 10.0f);
-
-PARAM_DEFINE_FLOAT(RC9_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC9_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC9_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC9_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC9_DZ, 0.0f);
-
-PARAM_DEFINE_FLOAT(RC10_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC10_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC10_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC10_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC10_DZ, 0.0f);
-
-PARAM_DEFINE_FLOAT(RC11_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC11_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC11_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC11_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC11_DZ, 0.0f);
-
-PARAM_DEFINE_FLOAT(RC12_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC12_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC12_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC12_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC12_DZ, 0.0f);
-
-PARAM_DEFINE_FLOAT(RC13_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC13_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC13_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC13_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC13_DZ, 0.0f);
-
-PARAM_DEFINE_FLOAT(RC14_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC14_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC14_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC14_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC14_DZ, 0.0f);
-
-PARAM_DEFINE_FLOAT(RC15_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC15_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC15_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC15_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC15_DZ, 0.0f);
-
-PARAM_DEFINE_FLOAT(RC16_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC16_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC16_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC16_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC16_DZ, 0.0f);
-
-PARAM_DEFINE_FLOAT(RC17_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC17_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC17_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC17_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC17_DZ, 0.0f);
-
-PARAM_DEFINE_FLOAT(RC18_MIN, 1000);
-PARAM_DEFINE_FLOAT(RC18_TRIM, 1500);
-PARAM_DEFINE_FLOAT(RC18_MAX, 2000);
-PARAM_DEFINE_FLOAT(RC18_REV, 1.0f);
-PARAM_DEFINE_FLOAT(RC18_DZ, 0.0f);
-
-#ifdef CONFIG_ARCH_BOARD_PX4FMU_V1
-PARAM_DEFINE_INT32(RC_RL1_DSM_VCC, 0); /* Relay 1 controls DSM VCC */
-#endif
-
-/**
- * DSM binding trigger.
- *
- * -1 = Idle, 0 = Start DSM2 bind, 1 = Start DSMX bind
- *
- * @group Radio Calibration
- */
-PARAM_DEFINE_INT32(RC_DSM_BIND, -1);
-
+PARAM_DEFINE_FLOAT(ATT_VIBE_THRESH, 0.2f);
 
 /**
  * Scaling factor for battery voltage sensor on PX4IO.
  *
+ * @min 1
+ * @max 100000
  * @group Battery Calibration
  */
 PARAM_DEFINE_INT32(BAT_V_SCALE_IO, 10000);
 
-#ifdef CONFIG_ARCH_BOARD_PX4FMU_V2
 /**
- * Scaling factor for battery voltage sensor on FMU v2.
+ * Scaling from ADC counts to volt on the ADC input (battery voltage)
+ *
+ * This is not the battery voltage, but the intermediate ADC voltage.
+ * A value of -1 signifies that the board defaults are used, which is
+ * highly recommended.
  *
  * @group Battery Calibration
+ * @decimal 8
  */
-PARAM_DEFINE_FLOAT(BAT_V_SCALING, 0.0082f);
-#elif CONFIG_ARCH_BOARD_AEROCORE
+PARAM_DEFINE_FLOAT(BAT_CNT_V_VOLT, -1.0f);
+
 /**
- * Scaling factor for battery voltage sensor on AeroCore.
+ * Scaling from ADC counts to volt on the ADC input (battery current)
  *
- * For R70 = 133K, R71 = 10K --> scale = 1.8 * 143 / (4096*10) = 0.0063
+ * This is not the battery current, but the intermediate ADC voltage.
+ * A value of -1 signifies that the board defaults are used, which is
+ * highly recommended.
  *
  * @group Battery Calibration
+ * @decimal 8
  */
-PARAM_DEFINE_FLOAT(BAT_V_SCALING, 0.0063f);
-#else
+PARAM_DEFINE_FLOAT(BAT_CNT_V_CURR, -1.0);
+
 /**
- * Scaling factor for battery voltage sensor on FMU v1.
+ * Offset in volt as seen by the ADC input of the current sensor.
  *
- * FMUv1 standalone: 1/(10 / (47+10)) * (3.3 / 4095) = 0.00459340659
- * FMUv1 with PX4IO: 0.00459340659
- * FMUv1 with PX4IOAR: (3.3f * 52.0f / 5.0f / 4095.0f) = 0.00838095238
+ * This offset will be subtracted before calculating the battery
+ * current based on the voltage.
  *
  * @group Battery Calibration
+ * @decimal 8
  */
-PARAM_DEFINE_FLOAT(BAT_V_SCALING, 0.00459340659f);
-#endif
+PARAM_DEFINE_FLOAT(BAT_V_OFFS_CURR, 0.0);
 
 /**
- * Scaling factor for battery current sensor.
+ * Battery voltage divider (V divider)
+ *
+ * This is the divider from battery voltage to 3.3V ADC voltage.
+ * If using e.g. Mauch power modules the value from the datasheet
+ * can be applied straight here. A value of -1 means to use
+ * the board default.
  *
  * @group Battery Calibration
+ * @decimal 8
  */
-PARAM_DEFINE_FLOAT(BAT_C_SCALING, 0.0124);	/* scaling for 3DR power brick */
-
+PARAM_DEFINE_FLOAT(BAT_V_DIV, -1.0);
 
 /**
- * Roll control channel mapping.
+ * Battery current per volt (A/V)
  *
- * The channel index (starting from 1 for channel 1) indicates
- * which channel should be used for reading roll inputs from.
- * A value of zero indicates the switch is not assigned.
+ * The voltage seen by the 3.3V ADC multiplied by this factor
+ * will determine the battery current. A value of -1 means to use
+ * the board default.
+ *
+ * @group Battery Calibration
+ * @decimal 8
+ */
+PARAM_DEFINE_FLOAT(BAT_A_PER_V, -1.0);
+
+/**
+ * Battery monitoring source.
+ *
+ * This parameter controls the source of battery data. The value 'Power Module'
+ * means that measurements are expected to come from a power module. If the value is set to
+ * 'External' then the system expects to receive mavlink battery status messages.
  *
  * @min 0
- * @max 18
- * @group Radio Calibration
+ * @max 1
+ * @value 0 Power Module
+ * @value 1 External
+ * @group Battery Calibration
  */
-PARAM_DEFINE_INT32(RC_MAP_ROLL, 1);
+PARAM_DEFINE_INT32(BAT_SOURCE, 0);
 
 /**
- * Pitch control channel mapping.
+ * Lidar-Lite (LL40LS)
  *
- * The channel index (starting from 1 for channel 1) indicates
- * which channel should be used for reading pitch inputs from.
- * A value of zero indicates the switch is not assigned.
- *
+ * @reboot_required true
  * @min 0
- * @max 18
- * @group Radio Calibration
+ * @max 2
+ * @group Sensor Enable
+ * @value 0 Disabled
+ * @value 1 PWM
+ * @value 2 I2C
  */
-PARAM_DEFINE_INT32(RC_MAP_PITCH, 2);
+PARAM_DEFINE_INT32(SENS_EN_LL40LS, 0);
 
 /**
- * Failsafe channel mapping.
+ * Lightware laser rangefinder (serial)
  *
- * The RC mapping index indicates which channel is used for failsafe
- * If 0, whichever channel is mapped to throttle is used
- * otherwise the value indicates the specific rc channel to use
- *
+ * @reboot_required true
  * @min 0
- * @max 18
- *
- *
+ * @max 4
+ * @group Sensor Enable
+ * @value 0 Disabled
+ * @value 1 SF02
+ * @value 2 SF10/a
+ * @value 3 SF10/b
+ * @value 4 SF10/c
+ * @value 5 SF11/c
  */
-PARAM_DEFINE_INT32(RC_MAP_FAILSAFE, 0);  //Default to throttle function
+PARAM_DEFINE_INT32(SENS_EN_SF0X, 0);
 
 /**
- * Throttle control channel mapping.
+ * Maxbotix Soanr (mb12xx)
  *
- * The channel index (starting from 1 for channel 1) indicates
- * which channel should be used for reading throttle inputs from.
- * A value of zero indicates the switch is not assigned.
+ * @reboot_required true
  *
+ * @boolean
+ * @group Sensor Enable
+ */
+PARAM_DEFINE_INT32(SENS_EN_MB12XX, 0);
+
+/**
+ * TeraRanger Rangefinder (i2c)
+ *
+ * @reboot_required true
  * @min 0
- * @max 18
- * @group Radio Calibration
+ * @max 3
+ * @group Sensor Enable
+ * @value 0 Disabled
+ * @value 1 Autodetect
+ * @value 2 TROne
+ * @value 3 TREvo
  */
-PARAM_DEFINE_INT32(RC_MAP_THROTTLE, 3);
+PARAM_DEFINE_INT32(SENS_EN_TRANGER, 0);
 
 /**
- * Yaw control channel mapping.
+ * Lightware SF1xx/SF20/LW20 laser rangefinder (i2c)
  *
- * The channel index (starting from 1 for channel 1) indicates
- * which channel should be used for reading yaw inputs from.
- * A value of zero indicates the switch is not assigned.
- *
+ * @reboot_required true
  * @min 0
- * @max 18
- * @group Radio Calibration
+ * @max 5
+ * @group Sensor Enable
+ * @value 0 Disabled
+ * @value 1 SF10/a
+ * @value 2 SF10/b
+ * @value 3 SF10/c
+ * @value 4 SF11/c
+ * @value 5 SF/LW20
  */
-PARAM_DEFINE_INT32(RC_MAP_YAW, 4);
+PARAM_DEFINE_INT32(SENS_EN_SF1XX, 0);
 
 /**
- * Mode switch channel mapping.
+ * Thermal control of sensor temperature
  *
- * This is the main flight mode selector.
- * The channel index (starting from 1 for channel 1) indicates
- * which channel should be used for deciding about the main mode.
- * A value of zero indicates the switch is not assigned.
- *
- * @min 0
- * @max 18
- * @group Radio Calibration
+ * @value -1 Thermal control unavailable
+ * @value 0 Thermal control off
+ * @group Sensor Enable
  */
-PARAM_DEFINE_INT32(RC_MAP_MODE_SW, 0);
+PARAM_DEFINE_INT32(SENS_EN_THERMAL, -1);
 
 /**
- * Return switch channel mapping.
- *
- * @min 0
- * @max 18
- * @group Radio Calibration
- */
-PARAM_DEFINE_INT32(RC_MAP_RETURN_SW, 0);
+* Driver level cut frequency for gyro
+*
+* The cut frequency for the 2nd order butterworth filter on the gyro driver. This features
+* is currently supported by the mpu6000 and mpu9250. This only affects the signal sent to the
+* controllers, not the estimators. 0 disables the filter.
+*
+* @min 5
+* @max 1000
+* @unit Hz
+* @reboot_required true
+* @group Sensor Calibration
+*/
+PARAM_DEFINE_FLOAT(IMU_GYRO_CUTOFF, 30.0f);
 
 /**
- * Posctl switch channel mapping.
- *
- * @min 0
- * @max 18
- * @group Radio Calibration
- */
-PARAM_DEFINE_INT32(RC_MAP_POSCTL_SW, 0);
-
-/**
- * Loiter switch channel mapping.
- *
- * @min 0
- * @max 18
- * @group Radio Calibration
- */
-PARAM_DEFINE_INT32(RC_MAP_LOITER_SW, 0);
-
-/**
- * Acro switch channel mapping.
- *
- * @min 0
- * @max 18
- * @group Radio Calibration
- */
-PARAM_DEFINE_INT32(RC_MAP_ACRO_SW, 0);
-
-/**
- * Flaps channel mapping.
- *
- * @min 0
- * @max 18
- * @group Radio Calibration
- */
-PARAM_DEFINE_INT32(RC_MAP_FLAPS, 0);
-
-/**
- * Auxiliary switch 1 channel mapping.
- *
- * Default function: Camera pitch
- *
- * @min 0
- * @max 18
- * @group Radio Calibration
- */
-PARAM_DEFINE_INT32(RC_MAP_AUX1, 0);
-
-/**
- * Auxiliary switch 2 channel mapping.
- *
- * Default function: Camera roll
- *
- * @min 0
- * @max 18
- * @group Radio Calibration
- */
-PARAM_DEFINE_INT32(RC_MAP_AUX2, 0);	/**< default function: camera roll */
-
-/**
- * Auxiliary switch 3 channel mapping.
- *
- * Default function: Camera azimuth / yaw
- *
- * @min 0
- * @max 18
- * @group Radio Calibration
- */
-PARAM_DEFINE_INT32(RC_MAP_AUX3, 0);
-
-
-/**
- * Failsafe channel PWM threshold.
- *
- * @min 800
- * @max 2200
- * @group Radio Calibration
- */
-PARAM_DEFINE_INT32(RC_FAILS_THR, 0);
-
-/**
- * Threshold for selecting assist mode
- *
- * min:-1
- * max:+1
- *
- * 0-1 indicate where in the full channel range the threshold sits
- * 		0 : min
- * 		1 : max
- * sign indicates polarity of comparison
- * 		positive : true when channel>th
- * 		negative : true when channel<th
- *
- */
-PARAM_DEFINE_FLOAT(RC_ASSIST_TH, 0.25f);
-
-/**
- * Threshold for selecting auto mode
- *
- * min:-1
- * max:+1
- *
- * 0-1 indicate where in the full channel range the threshold sits
- * 		0 : min
- * 		1 : max
- * sign indicates polarity of comparison
- * 		positive : true when channel>th
- * 		negative : true when channel<th
- *
- */
-PARAM_DEFINE_FLOAT(RC_AUTO_TH, 0.75f);
-
-/**
- * Threshold for selecting posctl mode
- *
- * min:-1
- * max:+1
- *
- * 0-1 indicate where in the full channel range the threshold sits
- * 		0 : min
- * 		1 : max
- * sign indicates polarity of comparison
- * 		positive : true when channel>th
- * 		negative : true when channel<th
- *
- */
-PARAM_DEFINE_FLOAT(RC_POSCTL_TH, 0.5f);
-
-/**
- * Threshold for selecting return to launch mode
- *
- * min:-1
- * max:+1
- *
- * 0-1 indicate where in the full channel range the threshold sits
- * 		0 : min
- * 		1 : max
- * sign indicates polarity of comparison
- * 		positive : true when channel>th
- * 		negative : true when channel<th
- *
- */
-PARAM_DEFINE_FLOAT(RC_RETURN_TH, 0.5f);
-
-/**
- * Threshold for selecting loiter mode
- *
- * min:-1
- * max:+1
- *
- * 0-1 indicate where in the full channel range the threshold sits
- * 		0 : min
- * 		1 : max
- * sign indicates polarity of comparison
- * 		positive : true when channel>th
- * 		negative : true when channel<th
- *
- */
-PARAM_DEFINE_FLOAT(RC_LOITER_TH, 0.5f);
-
-/**
- * Threshold for selecting acro mode
- *
- * min:-1
- * max:+1
- *
- * 0-1 indicate where in the full channel range the threshold sits
- * 		0 : min
- * 		1 : max
- * sign indicates polarity of comparison
- * 		positive : true when channel>th
- * 		negative : true when channel<th
- *
- */
-PARAM_DEFINE_FLOAT(RC_ACRO_TH, 0.5f);
+* Driver level cut frequency for accel
+*
+* The cut frequency for the 2nd order butterworth filter on the accel driver. This features
+* is currently supported by the mpu6000 and mpu9250. This only affects the signal sent to the
+* controllers, not the estimators. 0 disables the filter.
+*
+* @min 5
+* @max 1000
+* @unit Hz
+* @reboot_required true
+* @group Sensor Calibration
+*/
+PARAM_DEFINE_FLOAT(IMU_ACCEL_CUTOFF, 30.0f);

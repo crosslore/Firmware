@@ -33,9 +33,10 @@
 /**
  * @file navigator_mode.h
  *
- * Helper class for different modes in navigator
+ * Base class for different modes in navigator
  *
  * @author Julian Oes <julian@oes.ch>
+ * @author Anton Babushkin <anton.babushkin@me.com>
  */
 
 #ifndef NAVIGATOR_MODE_H
@@ -55,15 +56,12 @@ class Navigator;
 class NavigatorMode : public control::SuperBlock
 {
 public:
-	/**
-	 * Constructor
-	 */
 	NavigatorMode(Navigator *navigator, const char *name);
+	virtual ~NavigatorMode() = default;
+	NavigatorMode(const NavigatorMode &) = delete;
+	NavigatorMode operator=(const NavigatorMode &) = delete;
 
-	/**
-	 * Destructor
-	 */
-	virtual ~NavigatorMode();
+	void run(bool active);
 
 	/**
 	 * This function is called while the mode is inactive
@@ -71,16 +69,25 @@ public:
 	virtual void on_inactive();
 
 	/**
-	 * This function is called while the mode is active
-	 *
-	 * @param position setpoint triplet to set
-	 * @return true if position setpoint triplet has been changed
+	 * This function is called one time when mode becomes active, pos_sp_triplet must be initialized here
 	 */
-	virtual bool on_active(struct position_setpoint_triplet_s *pos_sp_triplet);
+	virtual void on_activation();
+
+	/**
+	 * This function is called one time when mode becomes inactive
+	 */
+	virtual void on_inactivation();
+
+	/**
+	 * This function is called while the mode is active
+	 */
+	virtual void on_active();
 
 protected:
-	Navigator *_navigator;
-	bool _first_run;
+	Navigator *_navigator{nullptr};
+
+private:
+	bool _active{false};
 };
 
 #endif

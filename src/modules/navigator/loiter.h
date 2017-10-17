@@ -50,25 +50,39 @@
 class Loiter : public MissionBlock
 {
 public:
-	/**
-	 * Constructor
-	 */
 	Loiter(Navigator *navigator, const char *name);
 
-	/**
-	 * Destructor
-	 */
 	~Loiter();
 
-	/**
-	 * This function is called while the mode is inactive
-	 */
 	virtual void on_inactive();
 
+	virtual void on_activation();
+
+	virtual void on_active();
+
+	enum mission_yaw_mode {
+		MISSION_YAWMODE_NONE = 0,
+		MISSION_YAWMODE_FRONT_TO_WAYPOINT = 1,
+		MISSION_YAWMODE_FRONT_TO_HOME = 2,
+		MISSION_YAWMODE_BACK_TO_HOME = 3,
+		MISSION_YAWMODE_MAX = 4
+	};
+
+private:
 	/**
-	 * This function is called while the mode is active
+	 * Use the stored reposition location of the navigator
+	 * to move to a new location.
 	 */
-	virtual bool on_active(struct position_setpoint_triplet_s *pos_sp_triplet);
+	void reposition();
+
+	/**
+	 * Set the position to hold based on the current local position
+	 */
+	void set_loiter_position();
+
+	control::BlockParamFloat _param_min_alt;
+	control::BlockParamInt _param_yawmode;
+	bool _loiter_pos_set;
 };
 
 #endif

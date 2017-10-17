@@ -40,59 +40,90 @@
  */
 
 #include "CatapultLaunchMethod.h"
-#include <systemlib/err.h>
 
 namespace launchdetection
 {
 
 CatapultLaunchMethod::CatapultLaunchMethod(SuperBlock *parent) :
 	SuperBlock(parent, "CAT"),
-	last_timestamp(hrt_absolute_time()),
-	integrator(0.0f),
-	launchDetected(false),
-	threshold_accel(this, "A"),
-	threshold_time(this, "T")
+	thresholdAccel(this, "A"),
+	thresholdTime(this, "T"),
+	motorDelay(this, "MDEL"),
+	pitchMaxPreThrottle(this, "PMAX")
 {
-
-}
-
-CatapultLaunchMethod::~CatapultLaunchMethod() {
-
+	last_timestamp = hrt_absolute_time();
 }
 
 void CatapultLaunchMethod::update(float accel_x)
 {
-	float dt = (float)hrt_elapsed_time(&last_timestamp) * 1e-6f;
+	float dt = hrt_elapsed_time(&last_timestamp) * 1e-6f;
 	last_timestamp = hrt_absolute_time();
 
-	if (accel_x > threshold_accel.get()) {
-		integrator += accel_x * dt;
-//		warnx("*** integrator %.3f, threshold_accel %.3f, threshold_time %.3f, accel_x %.3f, dt %.3f",
-//				(double)integrator, (double)threshold_accel.get(),  (double)threshold_time.get(), (double)accel_x, (double)dt);
-		if (integrator > threshold_accel.get() * threshold_time.get()) {
-			launchDetected = true;
+	switch (state) {
+	case LAUNCHDETECTION_RES_NONE:
+
+		/* Detect a acceleration that is longer and stronger as the minimum given by the params */
+		if (accel_x > thresholdAccel.get()) {
+			integrator += dt;
+
+			if (integrator > thresholdTime.get()) {
+				if (motorDelay.get() > 0.0f) {
+					state = LAUNCHDETECTION_RES_DETECTED_ENABLECONTROL;
+					PX4_WARN("Launch detected: enablecontrol, waiting %8.4fs until full throttle",
+						 double(motorDelay.get()));
+
+				} else {
+					/* No motor delay set: go directly to enablemotors state */
+					state = LAUNCHDETECTION_RES_DETECTED_ENABLEMOTORS;
+					PX4_WARN("Launch detected: enablemotors (delay not activated)");
+				}
+			}
+
+		} else {
+			reset();
 		}
 
-	} else {
-//		warnx("integrator %.3f, threshold_accel %.3f, threshold_time %.3f, accel_x %.3f, dt %.3f",
-//				(double)integrator, (double)threshold_accel.get(),  (double)threshold_time.get(), (double)accel_x, (double)dt);
-		/* reset integrator */
-		integrator = 0.0f;
-		launchDetected = false;
+		break;
+
+	case LAUNCHDETECTION_RES_DETECTED_ENABLECONTROL:
+		/* Vehicle is currently controlling attitude but not with full throttle. Waiting until delay is
+		 * over to allow full throttle */
+		motorDelayCounter += dt;
+
+		if (motorDelayCounter > motorDelay.get()) {
+			PX4_WARN("Launch detected: state enablemotors");
+			state = LAUNCHDETECTION_RES_DETECTED_ENABLEMOTORS;
+		}
+
+		break;
+
+	default:
+		break;
+
 	}
-
 }
 
-bool CatapultLaunchMethod::getLaunchDetected()
+LaunchDetectionResult CatapultLaunchMethod::getLaunchDetected() const
 {
-	return launchDetected;
+	return state;
 }
-
 
 void CatapultLaunchMethod::reset()
 {
 	integrator = 0.0f;
-	launchDetected = false;
+	motorDelayCounter = 0.0f;
+	state = LAUNCHDETECTION_RES_NONE;
 }
 
+float CatapultLaunchMethod::getPitchMax(float pitchMaxDefault)
+{
+	/* If motor is turned on do not impose the extra limit on maximum pitch */
+	if (state == LAUNCHDETECTION_RES_DETECTED_ENABLEMOTORS) {
+		return pitchMaxDefault;
+
+	} else {
+		return pitchMaxPreThrottle.get();
+	}
 }
+
+} // namespace launchdetection

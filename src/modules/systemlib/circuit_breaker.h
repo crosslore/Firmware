@@ -52,12 +52,18 @@
 #define CBRK_SUPPLY_CHK_KEY	894281
 #define CBRK_RATE_CTRL_KEY	140253
 #define CBRK_IO_SAFETY_KEY	22027
+#define CBRK_AIRSPD_CHK_KEY	162128
+#define CBRK_FLIGHTTERM_KEY	121212
+#define CBRK_ENGINEFAIL_KEY	284953
+#define CBRK_GPSFAIL_KEY	240024
+#define CBRK_USB_CHK_KEY	197848
+#define CBRK_VELPOSERR_KEY	201607
 
 #include <stdbool.h>
 
 __BEGIN_DECLS
 
-__EXPORT bool circuit_breaker_enabled(const char* breaker, int32_t magic);
+extern "C" __EXPORT bool circuit_breaker_enabled(const char *breaker, int32_t magic);
 
 __END_DECLS
 
