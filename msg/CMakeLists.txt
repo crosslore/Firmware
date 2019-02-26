@@ -38,13 +38,14 @@ set(msg_files
 	actuator_outputs.msg
 	adc_report.msg
 	airspeed.msg
-	att_pos_mocap.msg
 	battery_status.msg
 	camera_capture.msg
 	camera_trigger.msg
 	collision_report.msg
+	collision_constraints.msg
 	commander_state.msg
 	cpuload.msg
+	debug_array.msg
 	debug_key_value.msg
 	debug_value.msg
 	debug_vect.msg
@@ -52,36 +53,46 @@ set(msg_files
 	distance_sensor.msg
 	ekf2_innovations.msg
 	ekf2_timestamps.msg
+	ekf_gps_drift.msg
+	ekf_gps_position.msg
 	esc_report.msg
 	esc_status.msg
 	estimator_status.msg
-	filtered_bottom_flow.msg
 	follow_target.msg
-	fw_pos_ctrl_status.msg
 	geofence_result.msg
 	gps_dump.msg
 	gps_inject_data.msg
-	hil_sensor.msg
 	home_position.msg
 	input_rc.msg
+	iridiumsbd_status.msg
+	irlock_report.msg
+	landing_gear.msg
+	landing_target_innovations.msg
+	landing_target_pose.msg
 	led_control.msg
 	log_message.msg
 	manual_control_setpoint.msg
 	mavlink_log.msg
-	mc_att_ctrl_status.msg
 	mission.msg
 	mission_result.msg
 	mount_orientation.msg
 	multirotor_motor_limits.msg
+	obstacle_distance.msg
 	offboard_control_mode.msg
 	optical_flow.msg
-	output_pwm.msg
+	orbit_status.msg
 	parameter_update.msg
+	ping.msg
+	position_controller_landing_status.msg
+	position_controller_status.msg
 	position_setpoint.msg
 	position_setpoint_triplet.msg
 	power_button_state.msg
 	pwm_input.msg
 	qshell_req.msg
+	qshell_retval.msg
+	radio_status.msg
+	rate_ctrl_status.msg
 	rc_channels.msg
 	rc_parameter_map.msg
 	safety.msg
@@ -102,30 +113,48 @@ set(msg_files
 	tecs_status.msg
 	telemetry_status.msg
 	test_motor.msg
-	time_offset.msg
+	timesync_status.msg
+	trajectory_waypoint.msg
 	transponder_report.msg
+	tune_control.msg
 	uavcan_parameter_request.msg
 	uavcan_parameter_value.msg
 	ulog_stream.msg
 	ulog_stream_ack.msg
+	vehicle_air_data.msg
 	vehicle_attitude.msg
 	vehicle_attitude_setpoint.msg
 	vehicle_command.msg
 	vehicle_command_ack.msg
+	vehicle_constraints.msg
 	vehicle_control_mode.msg
-	vehicle_force_setpoint.msg
 	vehicle_global_position.msg
 	vehicle_gps_position.msg
 	vehicle_land_detected.msg
 	vehicle_local_position.msg
 	vehicle_local_position_setpoint.msg
+	vehicle_magnetometer.msg
+	vehicle_odometry.msg
 	vehicle_rates_setpoint.msg
 	vehicle_roi.msg
 	vehicle_status.msg
 	vehicle_status_flags.msg
+	vehicle_trajectory_waypoint.msg
 	vtol_vehicle_status.msg
 	wind_estimate.msg
 	)
+
+if(NOT EXTERNAL_MODULES_LOCATION STREQUAL "")
+	# Check that the msg directory and the CMakeLists.txt file exists
+	if(EXISTS ${EXTERNAL_MODULES_LOCATION}/msg/CMakeLists.txt)
+		add_subdirectory(${EXTERNAL_MODULES_LOCATION}/msg external_msg)
+
+		# Add each of the external message files to the global msg_files list
+		foreach(external_msg_file ${config_msg_list_external})
+			list(APPEND msg_files ${EXTERNAL_MODULES_LOCATION}/msg/${external_msg_file})
+		endforeach()
+	endif()
+endif()
 
 px4_add_git_submodule(TARGET git_gencpp PATH tools/gencpp)
 px4_add_git_submodule(TARGET git_genmsg PATH tools/genmsg)
@@ -152,7 +181,10 @@ add_custom_command(OUTPUT ${uorb_headers}
 		-e templates/uorb
 		-t ${CMAKE_CURRENT_BINARY_DIR}/tmp/headers
 		-q
-	DEPENDS ${msg_files}
+	DEPENDS
+		${msg_files}
+		templates/uorb/msg.h.template
+		tools/px_generate_uorb_topic_files.py
 	COMMENT "Generating uORB topic headers"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	VERBATIM
@@ -169,84 +201,14 @@ add_custom_command(OUTPUT ${uorb_sources}
 		-e templates/uorb
 		-t ${CMAKE_CURRENT_BINARY_DIR}/tmp/sources
 		-q
-	DEPENDS ${msg_files}
+	DEPENDS
+		${msg_files}
+		templates/uorb/msg.cpp.template
+		tools/px_generate_uorb_topic_files.py
 	COMMENT "Generating uORB topic sources"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	VERBATIM
 	)
 
-px4_add_library(uorb_msgs ${uorb_sources})
-add_dependencies(uorb_msgs uorb_headers)
-
-###############################################################################
-# micro-cdr serialization
-###############################################################################
-# if RTPS is enabled generate serialization code for each uORB message
-if (GENERATE_RTPS_BRIDGE)
-
-	set(msg_out_path_microcdr ${PX4_BINARY_DIR}/uORB_microcdr/topics)
-	set(msg_source_out_path_microcdr ${CMAKE_CURRENT_BINARY_DIR}/topics_microcdr_sources)
-
-	set(uorb_headers_microcdr)
-	set(uorb_sources_microcdr)
-
-	# send topic files
-	set(send_topic_files)
-	foreach(topic ${config_rtps_send_topics})
-		list(APPEND send_topic_files ${PX4_SOURCE_DIR}/msg/${topic}.msg)
-		list(APPEND uorb_headers_microcdr ${msg_out_path_microcdr}/${topic}.h)
-		list(APPEND uorb_sources_microcdr ${msg_source_out_path_microcdr}/${topic}.cpp)
-	endforeach()
-
-	# receive topic files
-	set(receive_topic_files)
-	foreach(topic ${config_rtps_receive_topics})
-		list(APPEND receive_topic_files ${PX4_SOURCE_DIR}/msg/${topic}.msg)
-		list(APPEND uorb_headers_microcdr ${msg_out_path_microcdr}/${topic}.h)
-		list(APPEND uorb_sources_microcdr ${msg_source_out_path_microcdr}/${topic}.cpp)
-	endforeach()
-
-	list(REMOVE_DUPLICATES uorb_headers_microcdr)
-	list(REMOVE_DUPLICATES uorb_sources_microcdr)
-
-	# Generate uORB serialization headers
-	add_custom_command(OUTPUT ${uorb_headers_microcdr}
-		COMMAND ${PYTHON_EXECUTABLE} tools/px_generate_uorb_topic_files.py
-			--headers
-			-f ${send_topic_files} ${receive_topic_files}
-			-i ${CMAKE_CURRENT_SOURCE_DIR}
-			-o ${msg_out_path_microcdr}
-			-e templates/uorb_microcdr
-			-t ${CMAKE_CURRENT_BINARY_DIR}/tmp/headers_microcdr
-			-q
-		DEPENDS ${msg_files}
-		COMMENT "Generating uORB microcdr topic headers"
-		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-		VERBATIM
-		)
-	add_custom_target(uorb_headers_microcdr DEPENDS ${uorb_headers_microcdr})
-
-	# Generate uORB serialization sources
-	add_custom_command(OUTPUT ${uorb_sources_microcdr}
-		COMMAND ${PYTHON_EXECUTABLE} tools/px_generate_uorb_topic_files.py
-			--sources
-			-f ${send_topic_files} ${receive_topic_files}
-			-i ${CMAKE_CURRENT_SOURCE_DIR}
-			-o ${msg_source_out_path_microcdr}
-			-e templates/uorb_microcdr
-			-t ${CMAKE_CURRENT_BINARY_DIR}/tmp/sources_microcdr
-			-q
-		DEPENDS ${msg_files}
-		COMMENT "Generating uORB microcdr topic sources"
-		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-		VERBATIM
-		)
-	px4_add_library(uorb_msgs_microcdr ${uorb_sources_microcdr})
-	add_dependencies(uorb_msgs_microcdr uorb_headers_microcdr uorb_headers)
-
-	# microCDR
-	target_include_directories(uorb_msgs_microcdr
-		PRIVATE ${PX4_SOURCE_DIR}/src/lib/micro-CDR/include
-		PRIVATE ${PX4_BINARY_DIR}/src/lib/micro-CDR/include/microcdr
-	)
-endif()
+add_library(uorb_msgs ${uorb_sources})
+add_dependencies(uorb_msgs prebuild_targets uorb_headers)
